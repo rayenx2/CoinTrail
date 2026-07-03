@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320">
+  <defs>
+    <linearGradient id="bgCoinTrail" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0f1e"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accCoinTrail" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+    <linearGradient id="coinIconCoinTrail" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#10b981"/>
+    </linearGradient>
+    <filter id="glowCoinTrail" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="gridCoinTrail" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+    <radialGradient id="rgCoinTrail" cx="85%" cy="50%" r="40%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#0a0f1e;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1280" height="320" fill="url(#bgCoinTrail)"/>
+  <rect width="1280" height="320" fill="url(#gridCoinTrail)" opacity="0.4"/>
+  <rect width="1280" height="320" fill="url(#rgCoinTrail)"/>
+  <rect x="0" y="0" width="1280" height="2" fill="url(#accCoinTrail)" opacity="0.7"/>
+  <rect x="0" y="0" width="4" height="320" fill="url(#accCoinTrail)"/>
+
+  <g transform="translate(64, 112)" filter="url(#glowCoinTrail)">
+    <circle cx="48" cy="48" r="44" fill="url(#coinIconCoinTrail)"/>
+    <circle cx="48" cy="48" r="34" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2.5"/>
+    <text x="48" y="63" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="44" font-weight="800"
+          fill="#ffffff" text-anchor="middle">€</text>
+  </g>
+
+  <text x="184" y="158" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+        font-size="62" font-weight="700" fill="#f1f5f9" letter-spacing="-2">
+    Coin<tspan fill="url(#accCoinTrail)">Trail</tspan>
+  </text>
+
+  <text x="186" y="198" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+        font-size="17" font-weight="400" fill="#64748b" letter-spacing="0.2">
+    Self-hosted expense &amp; budget tracking  ·  Spring Boot 3  ·  React 18
+  </text>
+
+  <line x1="184" y1="218" x2="820" y2="218" stroke="#1e293b" stroke-width="1"/>
+
+  <g transform="translate(184, 236)">
+    <rect width="118" height="34" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="59" y="13" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="9" fill="#475569" text-anchor="middle" letter-spacing="1" font-weight="600">BUDGETS</text>
+    <text x="59" y="27" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="11" fill="#34d399" text-anchor="middle" font-weight="600">multi-category</text>
+  </g>
+  <g transform="translate(314, 236)">
+    <rect width="118" height="34" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="59" y="13" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="9" fill="#475569" text-anchor="middle" letter-spacing="1" font-weight="600">EXPORTS</text>
+    <text x="59" y="27" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="11" fill="#34d399" text-anchor="middle" font-weight="600">PDF · CSV</text>
+  </g>
+  <g transform="translate(444, 236)">
+    <rect width="118" height="34" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="59" y="13" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="9" fill="#475569" text-anchor="middle" letter-spacing="1" font-weight="600">ANALYTICS</text>
+    <text x="59" y="27" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="11" fill="#34d399" text-anchor="middle" font-weight="600">trends · savings</text>
+  </g>
+  <g transform="translate(574, 236)">
+    <rect width="118" height="34" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="59" y="13" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="9" fill="#475569" text-anchor="middle" letter-spacing="1" font-weight="600">SPRING BOOT 3</text>
+    <text x="59" y="27" font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+          font-size="11" fill="#34d399" text-anchor="middle" font-weight="600">React 18</text>
+  </g>
+</svg>

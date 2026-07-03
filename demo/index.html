@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoinTrail — Enterprise Expense Tracker Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    /* =====================================================================
+       BASE / RESET
+    ===================================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #0b0f1a;
+      --surface:     #111827;
+      --surface2:    #1c2536;
+      --border:      rgba(255,255,255,0.07);
+      --accent:      #6366f1;
+      --accent2:     #22d3ee;
+      --accent3:     #f59e0b;
+      --danger:      #ef4444;
+      --success:     #22c55e;
+      --text:        #e2e8f0;
+      --muted:       #64748b;
+      --radius:      12px;
+      --radius-lg:   18px;
+      --glow:        0 0 24px rgba(99,102,241,0.18);
+      --transition:  0.25s ease;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* =====================================================================
+       GLASSMORPHISM CARD
+    ===================================================================== */
+    .glass {
+      background: linear-gradient(135deg,
+        rgba(255,255,255,0.06) 0%,
+        rgba(255,255,255,0.02) 100%);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg);
+    }
+    .glass:hover { border-color: rgba(99,102,241,0.25); }
+
+    /* =====================================================================
+       HEADER / HERO
+    ===================================================================== */
+    header {
+      background: linear-gradient(160deg, #0d1424 0%, #111827 60%, #0f1a2e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      box-shadow: var(--glow);
+    }
+    .badge-live {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
+      color: var(--success); border-radius: 20px; padding: 3px 12px;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+    }
+    .badge-live::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+    .nav-links { display: flex; gap: 1.4rem; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 0.875rem;
+      transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* =====================================================================
+       HERO SECTION
+    ===================================================================== */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem 3rem;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+      color: #a5b4fc; border-radius: 20px; padding: 5px 16px;
+      font-size: 0.8rem; font-weight: 600; margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.1rem; color: var(--muted); max-width: 600px;
+      margin: 0 auto 2.5rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.7rem 1.6rem; border-radius: 10px; border: none;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: all var(--transition);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #818cf8);
+      color: #fff; box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(99,102,241,0.5); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+
+    /* =====================================================================
+       STATS STRIP
+    ===================================================================== */
+    .stats-strip {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+    }
+    .stats-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; text-align: center;
+    }
+    .stat-item .stat-number {
+      font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-item .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* =====================================================================
+       MAIN LAYOUT
+    ===================================================================== */
+    main {
+      max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem 4rem;
+    }
+
+    /* =====================================================================
+       TABS
+    ===================================================================== */
+    .tab-bar {
+      display: flex; gap: 4px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 4px; margin-bottom: 2rem;
+      overflow-x: auto; flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1; min-width: max-content;
+      padding: 0.55rem 1.1rem; border-radius: 8px; border: none;
+      background: transparent; color: var(--muted); font-size: 0.85rem;
+      font-weight: 500; cursor: pointer; transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: var(--surface2);
+      color: var(--text);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+    }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* =====================================================================
+       KPI CARDS
+    ===================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem; margin-bottom: 2rem;
+    }
+    .kpi-card {
+      padding: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--accent-color, var(--accent));
+    }
+    .kpi-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+      background: var(--icon-bg, rgba(99,102,241,0.12));
+    }
+    .kpi-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .kpi-value { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; }
+    .kpi-sub { font-size: 0.78rem; margin-top: 6px; }
+    .positive { color: var(--success); }
+    .negative { color: var(--danger); }
+    .warning { color: var(--accent3); }
+
+    /* =====================================================================
+       CHARTS GRID
+    ===================================================================== */
+    .charts-grid {
+      display: grid; grid-template-columns: 2fr 1fr;
+      gap: 1.25rem; margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card { padding: 1.5rem; }
+    .chart-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 1.2rem; color: var(--text); }
+    .chart-subtitle { font-size: 0.75rem; color: var(--muted); margin-top: -1rem; margin-bottom: 1.2rem; }
+
+    /* =====================================================================
+       TRANSACTIONS TABLE
+    ===================================================================== */
+    .table-card { padding: 1.5rem; margin-bottom: 2rem; }
+    .table-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 1.2rem; }
+    .tx-table { width: 100%; border-collapse: collapse; }
+    .tx-table th {
+      text-align: left; padding: 0.6rem 0.8rem;
+      font-size: 0.72rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    .tx-table td {
+      padding: 0.8rem 0.8rem; font-size: 0.875rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .tx-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .tx-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+    }
+    .tx-badge.income { background: rgba(34,197,94,0.12); color: var(--success); }
+    .tx-badge.expense { background: rgba(239,68,68,0.12); color: var(--danger); }
+    .cat-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      background: rgba(255,255,255,0.05); font-size: 0.78rem;
+    }
+
+    /* =====================================================================
+       BUDGET BARS
+    ===================================================================== */
+    .budgets-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .budget-card { padding: 1.4rem; }
+    .budget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .budget-name { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
+    .budget-amounts { font-size: 0.8rem; color: var(--muted); }
+    .budget-amounts span { color: var(--text); font-weight: 600; }
+    .progress-track {
+      height: 8px; background: rgba(255,255,255,0.07);
+      border-radius: 4px; overflow: hidden; margin-top: 0.7rem;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .budget-pct { font-size: 0.72rem; margin-top: 5px; text-align: right; }
+
+    /* =====================================================================
+       FEATURE TABS (HOW IT WORKS)
+    ===================================================================== */
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem; margin-bottom: 2rem;
+    }
+    .feature-card { padding: 1.6rem; }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 1rem;
+    }
+    .feature-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 0.84rem; color: var(--muted); line-height: 1.65; }
+    .endpoint-pill {
+      display: inline-block; margin-top: 0.7rem;
+      background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+      color: #a5b4fc; border-radius: 6px; padding: 3px 10px;
+      font-family: 'Courier New', monospace; font-size: 0.75rem;
+    }
+
+    /* =====================================================================
+       TECH BADGES
+    ===================================================================== */
+    .tech-section { margin-bottom: 3rem; }
+    .tech-section h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.4rem; }
+    .badge-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .tech-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.5rem 1rem;
+      font-size: 0.82rem; font-weight: 500;
+      transition: all var(--transition);
+    }
+    .tech-badge:hover {
+      border-color: rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.06);
+      transform: translateY(-2px);
+    }
+    .tech-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* =====================================================================
+       HOW IT WORKS STEPS
+    ===================================================================== */
+    .steps { counter-reset: step; display: flex; flex-direction: column; gap: 1rem; }
+    .step {
+      display: flex; gap: 1rem;
+      padding: 1.2rem 1.4rem;
+      border-radius: var(--radius); background: var(--surface);
+      border: 1px solid var(--border);
+      transition: border-color var(--transition);
+      counter-increment: step;
+    }
+    .step:hover { border-color: rgba(99,102,241,0.3); }
+    .step-num {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), #818cf8);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.9rem; color: #fff;
+    }
+    .step-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .step-content p { font-size: 0.82rem; color: var(--muted); }
+
+    /* =====================================================================
+       API REFERENCE SECTION
+    ===================================================================== */
+    .api-table { width: 100%; border-collapse: collapse; }
+    .api-table th {
+      text-align: left; padding: 0.6rem 0.8rem;
+      font-size: 0.72rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    .api-table td {
+      padding: 0.75rem 0.8rem; font-size: 0.82rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .method-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 5px;
+      font-size: 0.7rem; font-weight: 700; font-family: monospace;
+    }
+    .method-get { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .method-post { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .method-put { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .method-patch { background: rgba(168,85,247,0.15); color: #d8b4fe; }
+    .method-delete { background: rgba(239,68,68,0.15); color: #f87171; }
+    .api-path { font-family: monospace; color: var(--accent2); font-size: 0.8rem; }
+    .auth-chip {
+      display: inline-block; background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25); color: #fbbf24;
+      border-radius: 4px; padding: 1px 7px; font-size: 0.68rem; font-weight: 600;
+    }
+
+    /* =====================================================================
+       ARCHITECTURE SECTION
+    ===================================================================== */
+    .arch-diagram {
+      font-family: 'Courier New', monospace; font-size: 0.82rem;
+      color: #94a3b8; line-height: 1.9; padding: 1.5rem 2rem;
+      background: #0d1117; border: 1px solid var(--border); border-radius: var(--radius);
+      overflow-x: auto; white-space: pre;
+    }
+    .arch-diagram .hl { color: var(--accent2); }
+    .arch-diagram .hl2 { color: var(--accent); }
+    .arch-diagram .hl3 { color: var(--success); }
+
+    /* =====================================================================
+       FOOTER
+    ===================================================================== */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted); font-size: 0.82rem;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* =====================================================================
+       ANIMATIONS
+    ===================================================================== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.55s ease forwards; }
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+    /* =====================================================================
+       RECEIPT UPLOAD MOCKUP
+    ===================================================================== */
+    .upload-area {
+      border: 2px dashed rgba(99,102,241,0.3);
+      border-radius: var(--radius-lg); padding: 3rem 2rem;
+      text-align: center; transition: all var(--transition);
+      cursor: pointer; margin-bottom: 1.5rem;
+    }
+    .upload-area:hover {
+      border-color: rgba(99,102,241,0.6);
+      background: rgba(99,102,241,0.04);
+    }
+    .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .upload-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .upload-sub { font-size: 0.82rem; color: var(--muted); }
+    .ocr-result {
+      padding: 1.2rem 1.4rem;
+      border-radius: var(--radius);
+      background: rgba(34,197,94,0.05);
+      border: 1px solid rgba(34,197,94,0.2);
+    }
+    .ocr-result h4 { color: var(--success); font-size: 0.85rem; margin-bottom: 0.75rem; }
+    .ocr-row { display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0; }
+    .ocr-row .label { color: var(--muted); }
+
+    /* =====================================================================
+       APPROVAL WORKFLOW
+    ===================================================================== */
+    .workflow-steps { display: flex; flex-direction: column; gap: 0; }
+    .wf-step {
+      display: flex; gap: 1rem;
+      padding: 1rem 0;
+      position: relative;
+    }
+    .wf-step:not(:last-child)::after {
+      content: '';
+      position: absolute; left: 17px; top: 48px;
+      width: 2px; height: calc(100% - 8px);
+      background: var(--border);
+    }
+    .wf-dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 0.9rem; z-index: 1;
+    }
+    .wf-dot.done { background: rgba(34,197,94,0.15); border: 2px solid var(--success); }
+    .wf-dot.pending { background: rgba(245,158,11,0.15); border: 2px solid var(--accent3); }
+    .wf-dot.waiting { background: rgba(100,116,139,0.15); border: 2px solid var(--muted); }
+    .wf-content { flex: 1; }
+    .wf-title { font-weight: 600; font-size: 0.9rem; }
+    .wf-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .wf-status { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+    .wf-status.done { background: rgba(34,197,94,0.12); color: var(--success); }
+    .wf-status.pending { background: rgba(245,158,11,0.12); color: var(--accent3); }
+    .wf-status.waiting { background: rgba(100,116,139,0.12); color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- ===================================================================
+     HEADER
+=================================================================== -->
+<header>
+  <nav class="nav">
+    <div class="logo">
+      <div class="logo-icon">💸</div>
+      <span>CoinTrail</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <span class="badge-live">Demo Mode</span>
+      <div class="nav-links">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#features">Features</a>
+        <a href="#api">API</a>
+        <a href="https://github.com/rayenx2" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ===================================================================
+     HERO
+=================================================================== -->
+<section class="hero">
+  <div class="fade-up">
+    <div class="hero-eyebrow">
+      🚀 Full-Stack Enterprise Finance Platform
+    </div>
+  </div>
+  <h1 class="fade-up delay-1">Track Every Euro.<br>Own Your Data.</h1>
+  <p class="fade-up delay-2">
+    Self-hostable expense tracking and budget management built with Spring Boot 3 + React 18.
+    JWT auth, real-time analytics, PDF exports — no SaaS subscription required.
+  </p>
+  <div class="hero-cta fade-up delay-3">
+    <a href="#dashboard" class="btn btn-primary">
+      <span>View Dashboard</span>
+      <span>→</span>
+    </a>
+    <a href="https://github.com/rayenx2" target="_blank" class="btn btn-outline">
+      <span>⭐ Source Code</span>
+    </a>
+  </div>
+</section>
+
+<!-- ===================================================================
+     STATS STRIP
+=================================================================== -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-number" data-target="23">0</div>
+      <div class="stat-label">REST Endpoints</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="5">0</div>
+      <div class="stat-label">JPA Entities</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="4">0</div>
+      <div class="stat-label">Docker Services</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-suffix="ms" data-target="2">0</div>
+      <div class="stat-label">Cached Report Read</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-suffix="%" data-target="100">0</div>
+      <div class="stat-label">Budget Coverage</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" data-target="30">0</div>
+      <div class="stat-label">Day Refresh Token</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     MAIN
+=================================================================== -->
+<main id="dashboard">
+
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('analytics')">📊 Analytics</button>
+    <button class="tab-btn" onclick="switchTab('transactions')">💳 Transactions</button>
+    <button class="tab-btn" onclick="switchTab('budgets')">🎯 Budgets</button>
+    <button class="tab-btn" onclick="switchTab('exports')">📄 Exports</button>
+  </div>
+
+  <!-- ================================================================
+       TAB: ANALYTICS
+  ================================================================ -->
+  <div class="tab-panel active" id="tab-analytics">
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="glass kpi-card" style="--accent-color:#22c55e; --icon-bg:rgba(34,197,94,0.1)">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Total Income</div>
+        <div class="kpi-value" style="color:var(--success)" data-counter data-target="12450.00" data-prefix="€">€0</div>
+        <div class="kpi-sub positive">▲ 14.2% vs last month</div>
+      </div>
+      <div class="glass kpi-card" style="--accent-color:#ef4444; --icon-bg:rgba(239,68,68,0.1)">
+        <div class="kpi-icon">📤</div>
+        <div class="kpi-label">Total Expenses</div>
+        <div class="kpi-value" style="color:var(--danger)" data-counter data-target="7830.50" data-prefix="€">€0</div>
+        <div class="kpi-sub negative">▲ 5.1% vs last month</div>
+      </div>
+      <div class="glass kpi-card" style="--accent-color:#6366f1; --icon-bg:rgba(99,102,241,0.1)">
+        <div class="kpi-icon">⚖️</div>
+        <div class="kpi-label">Net Balance</div>
+        <div class="kpi-value" data-counter data-target="4619.50" data-prefix="€">€0</div>
+        <div class="kpi-sub positive">▲ Healthy surplus</div>
+      </div>
+      <div class="glass kpi-card" style="--accent-color:#22d3ee; --icon-bg:rgba(34,211,238,0.1)">
+        <div class="kpi-icon">🏦</div>
+        <div class="kpi-label">Savings Rate</div>
+        <div class="kpi-value" style="color:var(--accent2)" data-counter data-target="37.1" data-suffix="%">0%</div>
+        <div class="kpi-sub positive">Above 30% target</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="glass chart-card">
+        <h3>Monthly Income vs. Expenses</h3>
+        <p class="chart-subtitle">Last 6 months — powered by /api/analytics/summary</p>
+        <canvas id="trendChart" height="220"></canvas>
+      </div>
+      <div class="glass chart-card">
+        <h3>Expense Breakdown</h3>
+        <p class="chart-subtitle">Top categories this period</p>
+        <canvas id="categoryChart" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Budget vs Actual table -->
+    <div class="glass table-card">
+      <h3>Budget vs. Actual — June 2026</h3>
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Budget Limit</th>
+            <th>Spent</th>
+            <th>Remaining</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="cat-pill">🏠 Housing</span></td>
+            <td>€1,200.00</td>
+            <td>€1,190.00</td>
+            <td style="color:var(--success)">€10.00</td>
+            <td><span class="tx-badge expense">99% — Near Limit</span></td>
+          </tr>
+          <tr>
+            <td><span class="cat-pill">🍔 Food & Dining</span></td>
+            <td>€500.00</td>
+            <td>€320.50</td>
+            <td style="color:var(--success)">€179.50</td>
+            <td><span class="tx-badge income">64% — On Track</span></td>
+          </tr>
+          <tr>
+            <td><span class="cat-pill">🚗 Transport</span></td>
+            <td>€300.00</td>
+            <td>€145.00</td>
+            <td style="color:var(--success)">€155.00</td>
+            <td><span class="tx-badge income">48% — On Track</span></td>
+          </tr>
+          <tr>
+            <td><span class="cat-pill">💻 Software</span></td>
+            <td>€150.00</td>
+            <td>€168.00</td>
+            <td style="color:var(--danger)">-€18.00</td>
+            <td><span class="tx-badge expense" style="background:rgba(239,68,68,0.2)">112% — Exceeded</span></td>
+          </tr>
+          <tr>
+            <td><span class="cat-pill">📚 Education</span></td>
+            <td>€200.00</td>
+            <td>€89.00</td>
+            <td style="color:var(--success)">€111.00</td>
+            <td><span class="tx-badge income">44% — On Track</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       TAB: TRANSACTIONS
+  ================================================================ -->
+  <div class="tab-panel" id="tab-transactions">
+    <div class="glass table-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:1rem;">
+        <h3 style="margin-bottom:0">Recent Transactions</h3>
+        <div style="display:flex; gap:0.5rem;">
+          <span style="font-size:0.78rem; color:var(--muted); padding:0.4rem 0.8rem; background:var(--surface2); border-radius:8px;">Page 1 of 12</span>
+          <button class="btn btn-outline" style="padding:0.4rem 0.9rem; font-size:0.78rem;">Export CSV</button>
+        </div>
+      </div>
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--muted)">#1042</td>
+            <td>Client Invoice — GmbH Project</td>
+            <td><span class="cat-pill">💼 Freelance</span></td>
+            <td style="color:var(--muted)">2026-06-12</td>
+            <td><span class="tx-badge income">Income</span></td>
+            <td style="color:var(--success); font-weight:700">+€3,200.00</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted)">#1041</td>
+            <td>Monthly Rent — Bonn WG</td>
+            <td><span class="cat-pill">🏠 Housing</span></td>
+            <td style="color:var(--muted)">2026-06-01</td>
+            <td><span class="tx-badge expense">Expense</span></td>
+            <td style="color:var(--danger); font-weight:700">-€750.00</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted)">#1040</td>
+            <td>REWE — Weekly Groceries</td>
+            <td><span class="cat-pill">🍔 Food & Dining</span></td>
+            <td style="color:var(--muted)">2026-06-10</td>
+            <td><span class="tx-badge expense">Expense</span></td>
+            <td style="color:var(--danger); font-weight:700">-€87.30</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted)">#1039</td>
+            <td>DB Ticket — Bonn to Frankfurt</td>
+            <td><span class="cat-pill">🚗 Transport</span></td>
+            <td style="color:var(--muted)">2026-06-08</td>
+            <td><span class="tx-badge expense">Expense</span></td>
+            <td style="color:var(--danger); font-weight:700">-€29.00</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted)">#1038</td>
+            <td>GitHub Copilot — Monthly</td>
+            <td><span class="cat-pill">💻 Software</span></td>
+            <td style="color:var(--muted)">2026-06-05</td>
+            <td><span class="tx-badge expense">Expense</span></td>
+            <td style="color:var(--danger); font-weight:700">-€19.00</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted)">#1037</td>
+            <td>Udemy Course — Spring Boot Mastery</td>
+            <td><span class="cat-pill">📚 Education</span></td>
+            <td style="color:var(--muted)">2026-06-03</td>
+            <td><span class="tx-badge expense">Expense</span></td>
+            <td style="color:var(--danger); font-weight:700">-€14.99</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted)">#1036</td>
+            <td>Consulting Retainer — Q2</td>
+            <td><span class="cat-pill">💼 Freelance</span></td>
+            <td style="color:var(--muted)">2026-06-01</td>
+            <td><span class="tx-badge income">Income</span></td>
+            <td style="color:var(--success); font-weight:700">+€1,500.00</td>
+          </tr>
+          <tr>
+            <td style="color:var(--muted)">#1035</td>
+            <td>Netto — Groceries</td>
+            <td><span class="cat-pill">🍔 Food & Dining</span></td>
+            <td style="color:var(--muted)">2026-05-30</td>
+            <td><span class="tx-badge expense">Expense</span></td>
+            <td style="color:var(--danger); font-weight:700">-€54.20</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="display:flex; justify-content:space-between; margin-top:1rem; font-size:0.78rem; color:var(--muted);">
+        <span>Showing 8 of 118 transactions</span>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn btn-outline" style="padding:0.3rem 0.7rem; font-size:0.75rem;" disabled>← Prev</button>
+          <button class="btn btn-outline" style="padding:0.3rem 0.7rem; font-size:0.75rem;">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       TAB: BUDGETS
+  ================================================================ -->
+  <div class="tab-panel" id="tab-budgets">
+    <div class="budgets-grid">
+      <!-- Housing 99% -->
+      <div class="glass budget-card">
+        <div class="budget-header">
+          <span class="budget-name">🏠 Housing</span>
+          <span class="wf-status pending">Near Limit</span>
+        </div>
+        <div class="budget-amounts">Spent: <span>€1,190.00</span> / €1,200.00</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:0%; background:linear-gradient(90deg,#f59e0b,#ef4444)" data-width="99"></div>
+        </div>
+        <div class="budget-pct warning">99% used — 1 day until month end</div>
+      </div>
+
+      <!-- Food 64% -->
+      <div class="glass budget-card">
+        <div class="budget-header">
+          <span class="budget-name">🍔 Food & Dining</span>
+          <span class="wf-status done">On Track</span>
+        </div>
+        <div class="budget-amounts">Spent: <span>€320.50</span> / €500.00</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:0%; background:linear-gradient(90deg,#22c55e,#16a34a)" data-width="64"></div>
+        </div>
+        <div class="budget-pct positive">64% used</div>
+      </div>
+
+      <!-- Transport 48% -->
+      <div class="glass budget-card">
+        <div class="budget-header">
+          <span class="budget-name">🚗 Transport</span>
+          <span class="wf-status done">On Track</span>
+        </div>
+        <div class="budget-amounts">Spent: <span>€145.00</span> / €300.00</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:0%; background:linear-gradient(90deg,#22d3ee,#0891b2)" data-width="48"></div>
+        </div>
+        <div class="budget-pct" style="color:var(--accent2)">48% used</div>
+      </div>
+
+      <!-- Software 112% EXCEEDED -->
+      <div class="glass budget-card" style="border-color:rgba(239,68,68,0.3)">
+        <div class="budget-header">
+          <span class="budget-name">💻 Software</span>
+          <span class="wf-status" style="background:rgba(239,68,68,0.12);color:var(--danger)">Exceeded</span>
+        </div>
+        <div class="budget-amounts">Spent: <span style="color:var(--danger)">€168.00</span> / €150.00</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:0%; background:linear-gradient(90deg,#ef4444,#dc2626)" data-width="100"></div>
+        </div>
+        <div class="budget-pct negative">112% — Budget exceeded by €18.00</div>
+      </div>
+
+      <!-- Education 44% -->
+      <div class="glass budget-card">
+        <div class="budget-header">
+          <span class="budget-name">📚 Education</span>
+          <span class="wf-status done">On Track</span>
+        </div>
+        <div class="budget-amounts">Spent: <span>€89.00</span> / €200.00</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:0%; background:linear-gradient(90deg,#a78bfa,#7c3aed)" data-width="44"></div>
+        </div>
+        <div class="budget-pct" style="color:#a78bfa">44% used</div>
+      </div>
+
+      <!-- Entertainment 8% -->
+      <div class="glass budget-card">
+        <div class="budget-header">
+          <span class="budget-name">🎭 Entertainment</span>
+          <span class="wf-status done">On Track</span>
+        </div>
+        <div class="budget-amounts">Spent: <span>€24.00</span> / €300.00</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:0%; background:linear-gradient(90deg,#f472b6,#ec4899)" data-width="8"></div>
+        </div>
+        <div class="budget-pct" style="color:#f472b6">8% used — well within budget</div>
+      </div>
+    </div>
+
+    <div class="glass" style="padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+      <span style="font-size:1.5rem">⏰</span>
+      <div>
+        <div style="font-weight:600; font-size:0.9rem;">Budget Alert Scheduler Active</div>
+        <div style="font-size:0.78rem; color:var(--muted);">
+          Spring <code>@Scheduled</code> cron runs daily at 09:00 — checks all budgets and sends email alerts when spend reaches 90% or exceeds limit.
+          Today's run: <span style="color:var(--success)">Completed at 09:00:03</span> — 1 alert dispatched (Software budget exceeded).
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================================================================
+       TAB: EXPORTS
+  ================================================================ -->
+  <div class="tab-panel" id="tab-exports">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+      <div class="glass" style="padding:1.6rem;">
+        <h3 style="font-size:0.95rem; margin-bottom:0.8rem;">📄 Monthly PDF Statement</h3>
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">
+          Generates a professional PDF statement via <code style="color:var(--accent2)">GET /api/reports/monthly?startDate=&amp;endDate=</code> —
+          transactions, category summaries, and net balance for the selected date range. Rendered server-side with iText 7.
+        </p>
+        <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="alert('In live mode: GET /api/reports/monthly?startDate=2026-06-01&endDate=2026-06-30')">
+          Generate PDF Statement
+        </button>
+      </div>
+
+      <div class="glass" style="padding:1.6rem;">
+        <h3 style="font-size:0.95rem; margin-bottom:0.8rem;">📊 CSV Export</h3>
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem;">
+          Exports every transaction in a date range via <code style="color:var(--accent2)">GET /api/export/csv?startDate=&amp;endDate=</code> —
+          UTF-8 BOM-prefixed, RFC 4180 compliant, with a running balance column. Opens cleanly in Excel, Google Sheets, or DATEV import tools.
+        </p>
+        <button class="btn btn-outline" style="width:100%; justify-content:center;" onclick="alert('In live mode: GET /api/export/csv?startDate=2026-06-01&endDate=2026-06-30')">
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="glass" style="padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+      <span style="font-size:1.5rem">⏰</span>
+      <div>
+        <div style="font-weight:600; font-size:0.9rem;">Budget Alert Scheduler Active</div>
+        <div style="font-size:0.78rem; color:var(--muted);">
+          Spring <code>@Scheduled</code> cron runs daily at 09:00 — checks every budget and emails an alert once spend reaches 90% or exceeds the limit.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ===================================================================
+     FEATURES SECTION
+=================================================================== -->
+<section id="features" style="background:var(--surface); border-top:1px solid var(--border); padding: 4rem 2rem;">
+  <div style="max-width:1200px; margin:0 auto;">
+    <div style="text-align:center; margin-bottom:3rem;">
+      <h2 style="font-size:1.9rem; font-weight:800; margin-bottom:0.8rem;">Everything You Need to Track Finances</h2>
+      <p style="color:var(--muted); max-width:550px; margin:0 auto;">
+        Built with production patterns: stateless JWT auth, Redis caching, PDF generation, and
+        real-time analytics — self-hostable in one command.
+      </p>
+    </div>
+    <div class="feature-grid">
+      <div class="glass feature-card">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.1)">🔐</div>
+        <h4>JWT Auth with Refresh Rotation</h4>
+        <p>Stateless authentication with 24-hour access tokens and 30-day refresh tokens. Axios interceptor silently renews sessions on 401 — no re-login required.</p>
+        <span class="endpoint-pill">POST /api/auth/refresh-token</span>
+      </div>
+      <div class="glass feature-card">
+        <div class="feature-icon" style="background:rgba(34,211,238,0.1)">📊</div>
+        <h4>Live Analytics Engine</h4>
+        <p>Category breakdowns, savings rate, and 1–24 month income/expense trends computed from raw transactions in a single DB query — zero N+1 round-trips.</p>
+        <span class="endpoint-pill">GET /api/analytics/summary</span>
+      </div>
+      <div class="glass feature-card">
+        <div class="feature-icon" style="background:rgba(34,197,94,0.1)">📄</div>
+        <h4>PDF Monthly Statements</h4>
+        <p>Enterprise-grade PDF generation via iText 7 in the same JVM process. No external service call required — generates in ~200 ms for 100 transactions.</p>
+        <span class="endpoint-pill">GET /api/reports/monthly</span>
+      </div>
+      <div class="glass feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.1)">⏰</div>
+        <h4>Automated Budget Alerts</h4>
+        <p>Spring <code>@Scheduled</code> cron runs at 09:00 daily. Checks all active budgets — dispatches email alerts at 90% and 100% spend thresholds.</p>
+        <span class="endpoint-pill">cron: 0 0 9 * * ?</span>
+      </div>
+      <div class="glass feature-card">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.1)">🔁</div>
+        <h4>Recurring Transactions</h4>
+        <p>Set rent, a subscription, or your salary once with a day-of-month. A separate daily job auto-creates the real transaction when it's due — tracked per month so it never double-fires.</p>
+        <span class="endpoint-pill">cron: 0 5 0 * * ?</span>
+      </div>
+      <div class="glass feature-card">
+        <div class="feature-icon" style="background:rgba(239,68,68,0.1)">🗃️</div>
+        <h4>Redis-Backed Report Cache</h4>
+        <p>Monthly PDF statements are cached per user and date range with Spring Cache — regenerating the same statement twice hits Redis instead of re-querying and re-rendering. Cache is evicted automatically whenever a transaction or budget changes.</p>
+        <span class="endpoint-pill">@Cacheable("monthlyReports")</span>
+      </div>
+      <div class="glass feature-card">
+        <div class="feature-icon" style="background:rgba(168,85,247,0.1)">🩺</div>
+        <h4>Observability Built-in</h4>
+        <p>Spring Actuator exposes <code>/actuator/health</code> and <code>/actuator/metrics</code>. Custom <code>RequestLoggingFilter</code> injects correlation IDs into every request log.</p>
+        <span class="endpoint-pill">GET /actuator/health</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================
+     HOW IT WORKS
+=================================================================== -->
+<section style="padding: 4rem 2rem;">
+  <div style="max-width:800px; margin:0 auto;">
+    <h2 style="font-size:1.6rem; font-weight:800; margin-bottom:2rem; text-align:center;">
+      Up and Running in 3 Commands
+    </h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Clone and Configure</h4>
+          <p><code style="color:var(--accent2)">git clone https://github.com/rayenx2/CoinTrail.git && cd CoinTrail && cp .env.example .env</code> — all defaults work out of the box, no API keys required.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Start All 4 Services</h4>
+          <p><code style="color:var(--accent2)">docker compose up -d --build</code> — spins up backend (Spring Boot), frontend (Vite), PostgreSQL 15, and Redis 7. Backend becomes healthy in ~60 seconds.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Open the App</h4>
+          <p>Frontend at <code style="color:var(--accent2)">http://localhost:5062</code> — register, log in, and start tracking. Swagger UI available at <code style="color:var(--accent2)">http://localhost:8060/swagger-ui.html</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================
+     API REFERENCE
+=================================================================== -->
+<section id="api" style="background:var(--surface); border-top:1px solid var(--border); padding:4rem 2rem;">
+  <div style="max-width:1200px; margin:0 auto;">
+    <h2 style="font-size:1.6rem; font-weight:800; margin-bottom:2rem;">API Reference</h2>
+    <div class="glass" style="padding:1.5rem; overflow-x:auto;">
+      <table class="api-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+            <th>Auth</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><span class="api-path">/api/auth/register</span></td>
+            <td>Register a new user</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><span class="api-path">/api/auth/login</span></td>
+            <td>Login — returns access + refresh tokens</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><span class="api-path">/api/auth/refresh-token</span></td>
+            <td>Rotate refresh token, get new access token</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/transactions</span></td>
+            <td>Paginated transaction list</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><span class="api-path">/api/transactions</span></td>
+            <td>Create new income or expense transaction</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-put">PUT</span></td>
+            <td><span class="api-path">/api/transactions/{id}</span></td>
+            <td>Update an existing transaction</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-delete">DELETE</span></td>
+            <td><span class="api-path">/api/transactions/{id}</span></td>
+            <td>Delete a transaction</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/budgets</span></td>
+            <td>List category budgets for current month</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><span class="api-path">/api/budgets</span></td>
+            <td>Create or update a monthly category budget</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/categories</span></td>
+            <td>List all expense and income categories</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/analytics/summary?months=6</span></td>
+            <td>Analytics: income, expenses, trends, category breakdown, savings rate</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/reports/monthly?startDate=&endDate=</span></td>
+            <td>Download PDF monthly statement (iText 7)</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/export/csv?startDate=&endDate=</span></td>
+            <td>Export transactions in a date range to CSV</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/users/me</span></td>
+            <td>Get the current user's profile</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-patch">PATCH</span></td>
+            <td><span class="api-path">/api/users/me</span></td>
+            <td>Update display name and default currency</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><span class="api-path">/api/users/me/change-password</span></td>
+            <td>Change the current user's password</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-post">POST</span></td>
+            <td><span class="api-path">/api/recurring-transactions</span></td>
+            <td>Create a monthly recurring transaction rule</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/api/recurring-transactions</span></td>
+            <td>List recurring transaction rules</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-delete">DELETE</span></td>
+            <td><span class="api-path">/api/recurring-transactions/{id}</span></td>
+            <td>Stop a recurring transaction rule</td>
+            <td><span class="auth-chip">JWT</span></td>
+          </tr>
+          <tr>
+            <td><span class="method-badge method-get">GET</span></td>
+            <td><span class="api-path">/actuator/health</span></td>
+            <td>Service health: DB + Redis component status</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================
+     TECH STACK
+=================================================================== -->
+<section style="padding:4rem 2rem;" class="tech-section">
+  <div style="max-width:1200px; margin:0 auto;">
+    <h2>Tech Stack</h2>
+    <div class="badge-grid">
+      <div class="tech-badge"><span class="tech-dot" style="background:#f89820"></span>Java 21</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#6DB33F"></span>Spring Boot 3.4</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#6DB33F"></span>Spring Security</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#6DB33F"></span>Spring Data JPA</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#336791"></span>PostgreSQL 15</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#DC382D"></span>Redis 7</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#61DAFB"></span>React 18</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#646CFF"></span>Vite 8</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#38B2AC"></span>Tailwind CSS 4</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#e2e8f0"></span>Framer Motion</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#0DB7ED"></span>Docker Compose</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#ef4444"></span>iText 7 PDF</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#85EA2D"></span>springdoc OpenAPI</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#f59e0b"></span>JJWT 0.12.6</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#a78bfa"></span>MapStruct</div>
+      <div class="tech-badge"><span class="tech-dot" style="background:#6366f1"></span>Spring Actuator</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================
+     FOOTER
+=================================================================== -->
+<footer>
+  <p>
+    <strong>CoinTrail</strong> — Built by
+    <a href="https://github.com/rayenx2" target="_blank">Rayen Lassoued</a> ·
+    <a href="https://linkedin.com/in/Rayen-Lassoued" target="_blank">LinkedIn</a> ·
+  </p>
+  <p style="margin-top:0.5rem; font-size:0.75rem;">
+    Spring Boot 3 · React 18 · PostgreSQL 15 · Redis 7 · Docker Compose · MIT License
+  </p>
+</footer>
+
+<!-- ===================================================================
+     JAVASCRIPT
+=================================================================== -->
+<script>
+  /* ------------------------------------------------------------------ TAB SWITCHING */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      const panels = ['analytics','transactions','budgets','exports'];
+      b.classList.toggle('active', panels[i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'tab-' + name);
+    });
+    if (name === 'budgets') animateBudgetBars();
+  }
+
+  /* ------------------------------------------------------------------ ANIMATED COUNTERS */
+  function animateCounter(el) {
+    const target = parseFloat(el.dataset.target);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const duration = 1800;
+    const start = performance.now();
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const value = target * ease;
+      if (Number.isInteger(target)) {
+        el.textContent = prefix + Math.round(value) + suffix;
+      } else {
+        el.textContent = prefix + value.toFixed(2) + suffix;
+      }
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* Stat strip counters */
+  document.querySelectorAll('[data-target]').forEach(el => {
+    if (!el.hasAttribute('data-counter')) {
+      setTimeout(() => animateCounter(el), 300);
+    }
+  });
+
+  /* KPI card counters — trigger on visibility */
+  const kpiObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('[data-counter]').forEach(el => animateCounter(el));
+        kpiObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.kpi-grid').forEach(el => kpiObserver.observe(el));
+
+  /* ------------------------------------------------------------------ BUDGET BARS */
+  function animateBudgetBars() {
+    document.querySelectorAll('.progress-fill[data-width]').forEach(bar => {
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 50);
+    });
+  }
+
+  /* ------------------------------------------------------------------ CHARTS */
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  const income  = [8200, 9100, 7800, 11200, 10900, 12450];
+  const expense = [6100, 7200, 6900, 8100,  7600,  7830];
+
+  /* Trend chart */
+  new Chart(document.getElementById('trendChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [
+        {
+          label: 'Income',
+          data: income,
+          backgroundColor: 'rgba(34,197,94,0.7)',
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+        {
+          label: 'Expenses',
+          data: expense,
+          backgroundColor: 'rgba(239,68,68,0.7)',
+          borderRadius: 6,
+          borderSkipped: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#94a3b8', font: { size: 12 } } },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: {
+          ticks: { color: '#64748b', callback: v => '€' + v.toLocaleString() },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        }
+      }
+    }
+  });
+
+  /* Category doughnut */
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Housing', 'Food', 'Transport', 'Software', 'Education', 'Other'],
+      datasets: [{
+        data: [1190, 320.5, 145, 168, 89, 117],
+        backgroundColor: [
+          'rgba(99,102,241,0.8)',
+          'rgba(34,211,238,0.8)',
+          'rgba(34,197,94,0.8)',
+          'rgba(245,158,11,0.8)',
+          'rgba(168,85,247,0.8)',
+          'rgba(100,116,139,0.7)',
+        ],
+        borderWidth: 0,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '68%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#94a3b8', font: { size: 11 }, padding: 12 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` €${ctx.raw.toLocaleString()} (${(ctx.raw/2029.5*100).toFixed(1)}%)`
+          }
+        }
+      }
+    }
+  });
+
+  /* ------------------------------------------------------------------ INITIAL BUDGET BARS */
+  /* Animate on load if budgets tab is somehow active */
+  window.addEventListener('load', () => {
+    if (document.getElementById('tab-budgets').classList.contains('active')) {
+      animateBudgetBars();
+    }
+  });
+</script>
+</body>
+</html>
